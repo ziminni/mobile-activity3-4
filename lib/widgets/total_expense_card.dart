@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class TotalExpenseCard extends StatelessWidget {
-  const TotalExpenseCard({super.key});
+  const TotalExpenseCard({required this.totalAmount, super.key});
+
+  final double totalAmount;
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +19,13 @@ class TotalExpenseCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Total expenses:", style: TextStyle(fontSize: 14)),
+            Text("Total expenses:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
 
             Text(
-              "₱00.00",
+              "₱${totalAmount.toStringAsFixed(2)}",
               style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w500
+                fontSize: 32,
+                fontWeight: FontWeight.bold
               ),
             ),
           ],

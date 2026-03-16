@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:why/models/expense.dart';
 
-class AddExpenseDialog extends StatefulWidget {
-  const AddExpenseDialog({
+class EditExpenseDialog extends StatefulWidget {
+  const EditExpenseDialog({
+    required this.expense,
     List<String>? categories,
     super.key,
   }) : categories = categories ?? const [];
 
+  final Expense expense;
   final List<String> categories;
 
   @override
-  State<AddExpenseDialog> createState() => _AddExpenseDialogState();
+  State<EditExpenseDialog> createState() => _EditExpenseDialogState();
 }
 
-class _AddExpenseDialogState extends State<AddExpenseDialog> {
+class _EditExpenseDialogState extends State<EditExpenseDialog> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _amountController;
@@ -32,7 +34,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
       'Other'
     ];
     
-    // If custom categories exist, combine them with defaults (avoiding duplicates)
     if (widget.categories.isNotEmpty) {
       final combined = {...defaultCategories, ...widget.categories}.toList();
       return combined;
@@ -44,15 +45,11 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController();
-    _amountController = TextEditingController();
-    _noteController = TextEditingController();
-    _dateController = TextEditingController(
-      text: DateTime.now().toString().split(' ')[0],
-    );
-    // Set initial category to first in the list
-    final categories = _getCategories();
-    _selectedCategory = categories.isNotEmpty ? categories.first : 'Other';
+    _titleController = TextEditingController(text: widget.expense.title);
+    _amountController = TextEditingController(text: widget.expense.amount);
+    _noteController = TextEditingController(text: widget.expense.note);
+    _dateController = TextEditingController(text: widget.expense.date);
+    _selectedCategory = widget.expense.category;
   }
 
   @override
@@ -67,7 +64,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: DateTime.parse(_dateController.text),
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
@@ -80,14 +77,14 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final expense = Expense(
+      final updatedExpense = Expense(
         title: _titleController.text,
         amount: _amountController.text,
         note: _noteController.text,
         category: _selectedCategory,
         date: _dateController.text,
       );
-      Navigator.pop(context, expense);
+      Navigator.pop(context, updatedExpense);
     }
   }
 
@@ -105,7 +102,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Add Expense',
+                  'Edit Expense',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -116,8 +113,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
-                    labelText: 'note',
-                    hintText: '',
+                    labelText: 'Title',
+                    hintText: 'Enter expense title',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -135,8 +132,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    labelText: 'amount',
-                    hintText: 'enter amount',
+                    labelText: 'Amount',
+                    hintText: 'Enter amount',
                     prefixText: '₱ ',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -200,7 +197,18 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                 ),
                 const SizedBox(height: 16),
                 // Note
-        
+                TextFormField(
+                  controller: _noteController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Note (Optional)',
+                    hintText: 'Add a note',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 // Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -220,7 +228,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                         ),
                       ),
                       child: const Text(
-                        'Add',
+                        'Update',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
